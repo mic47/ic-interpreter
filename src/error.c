@@ -11,7 +11,9 @@ void ERROR(int type,const char*text,...){
 	}
 	fprintf(stderr,"ERROR:");
 	fprintf(stderr,text,args);
-	exit(1);
+	int a=5;
+	int b=5;
+	exit(1/(a-b));
 }
 
 void WARNING(int type,const char *text,...){

@@ -14,6 +14,7 @@ struct _Instruction{
 	Parameter *param;
 	int param_len;
 	char *label;
+	int line;
 };
 typedef struct _Instruction Instruction;
 

@@ -20,9 +20,11 @@ extern FILE* yyin;
 
 Map operators;
 Map keywords;
+int FatalError = 0;
 
-
-void createProgram(Program *program,FILE *input){
+void createProgram(FILE *input){
+	map_init(&operators);
+	map_init(&keywords);
 	map_set(&keywords,"new",IN_NEW);
 	map_set(&keywords,"delete",IN_DELETE);
 	map_set(&keywords,"pop",IN_POP);
@@ -46,11 +48,14 @@ void createProgram(Program *program,FILE *input){
 	map_set(&operators,"^",OP_XOR);
 	map_set(&operators,"<<",OP_SHL);
 	map_set(&operators,">>",OP_SHR);
+	memory_init(&memory);
+	memory_init(&program.memory);
 
 	//Nastavime Flexu aby cital vstup zo suboru input
 	yyin = input;
 	// Zavolame parser 
 	yyparse();
+	if(FatalError) ERROR(ERROR_USER,"Program has too many syntax errors.\n");
 
 }
 
@@ -84,19 +89,27 @@ int main (int argc, char **argv) {
 	FILE *input = fopen (argv[1], "r");
 
 	
-	createProgram(&program,input);
+	createProgram(input);
 
 	program.ip = 0;
 
 
 	Stack stack;
 	stack_init (&stack);
+	Stack instructionsStack;
+	stack_init (&instructionsStack);
 
 	long long incount = 0;
+	
+/*	for(int i=0;i<program.len;i++){
+		printf("%d %d\n",program.instructions[i].type,program.instructions[i].param_len);
+	}*/
 
-	while (1) {
+	int run=1;
+	while (run) {
+//		printf("Instruction: %d\n",program.ip);
 		int increment_instruction = 1;
-		//TODO: skontroluj ci instrukcia je OK
+		if(program.ip<0||program.ip>=program.len)ERROR(ERROR_INTERNAL,"Instruction pointer is outside program\n");
 		Instruction in = program.instructions[program.ip];
 		switch (in.type) {
 		case IN_NEW:
@@ -134,17 +147,14 @@ int main (int argc, char **argv) {
 		{
 			if (in.param_len != 0) ERROR(ERROR_INTERNAL,"return -- wrong number of parameters: %d\n",in.param_len);
 			increment_instruction = 1;
-			if (stack_empty (&stack) ) exit (0);
-			program.ip = stack_top (&stack);
-			stack_pop (&stack);
+			if (stack_empty (&instructionsStack) ) run=0;
+			program.ip = stack_top (&instructionsStack);
+			stack_pop (&instructionsStack);
 		}
 		break;
 		case IN_JUMP:
 		{
 			if (in.param_len != 1) ERROR(ERROR_INTERNAL,"jump -- wrong number of parameters: %d\n",in.param_len);
-			if (in.param[0].type != VAR_C) {
-				exit (1);
-			}
 			increment_instruction = 0;
 			program.ip = in.param[0].value;
 		}
@@ -183,7 +193,7 @@ int main (int argc, char **argv) {
 		{
 			if (in.param_len != 1)ERROR(ERROR_INTERNAL,"call -- wrong number of parameters: %d\n",in.param_len);
 			increment_instruction = 0;
-			stack_push (&stack, program.ip);
+			stack_push (&instructionsStack, program.ip);
 			program.ip = in.param[0].value;
 		}
 		break;
@@ -248,10 +258,12 @@ int main (int argc, char **argv) {
 		break;
 		default:
 			ERROR(ERROR_INTERNAL,"Unknown instruction with ID: %d\n", in.type);
-			exit (1);
 			break;
 		}
-		if (increment_instruction) program.ip++;
+		if (increment_instruction) {
+			program.ip++;
+			if(program.ip==program.len)run=0;
+		}
 		incount++;
 	}
 	fprintf (stderr, "Program successfully ended after executing %lld instructions.\n", incount);

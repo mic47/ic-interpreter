@@ -1,7 +1,7 @@
 %code requires{
 #include "semantics.h"
 }
-
+%locations
 %{
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,16 +11,21 @@
 #include "instructions.h"
 #include "map.h"
 #include "error.h"
+#include "parser.h"
 
 int  yylex(void);
-void yyerror (char const *s)
-{
-	printf ("%s\n", s);
-}
 
 extern Map keywords;
 extern Map operators;
 extern Program program;
+extern int FatalError;
+
+void yyerror (char const *s)
+{
+	fprintf (stderr,"Error from parser at line %d: %s\n",yylloc.last_line, s);
+	FatalError=1;
+	exit(1);
+}
 
 Map labelmap;
 int labelcount=0;
@@ -45,7 +50,10 @@ Parameter create_parameter_from_identifier(Identifier id){
 		case SEM_V: ret.type=VAR_V; ret.value=getVariableID(id.text); break;
 		case SEM_P: ret.type=VAR_P; ret.value=getVariableID(id.text); break;
 		case SEM_C: ret.type=VAR_C; ret.value=id.num; break;
-		default: exit(1);
+		default: 
+			fprintf(stderr,"Error: Instruction at line %d has keyword or operator as parameter.\n",yylloc.first_line);
+			FatalError=1;
+			break;
 	}
 	return ret;
 }
@@ -62,38 +70,59 @@ void checkInstruction(Instruction I){
 	switch(I.type){
 		case IN_NEW:
 		{
-			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P)exit(1);
+			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P){
+				fprintf(stderr,"Error: Instruction new at line %d need memory cell to store allocated memory.\n",yylloc.first_line);
+				FatalError=1;
+			}
 		}
 		break;
 		case IN_DELETE:
 		{
-			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P)exit(1);
+			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P){
+				fprintf(stderr,"Error: Instruction delete at line %d need memory cell to work!\n",yylloc.first_line);
+				FatalError=1;
+			}
 		}
 		break;
 		case IN_TOP: {
-			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P)exit(1);
+			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P){
+				fprintf(stderr,"Error: Instruction top at line %d need memory cell to work!\n",yylloc.first_line);
+				FatalError=1;
+			}
 		}
 		break;
 		case IN_READINT:
 		{
-			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P)exit(1);
+			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P){
+				fprintf(stderr,"Error: Instruction readint at line %d need memory cell to work!\n",yylloc.first_line);
+				FatalError=1;
+			}
 		}
 		break;
 		case IN_READCHAR:
 		{
-			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P)exit(1);
+			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P){
+				fprintf(stderr,"Error: Instruction readchar at line %d need memory cell to work!\n",yylloc.first_line);
+				FatalError=1;
+			}
 		}
 		break;
 		case IN_OPERATOR:
 		{
-			if (I.param[1].type!=VAR_V && I.param[1].type!=VAR_P)exit(1);
+			if (I.param[1].type!=VAR_V && I.param[1].type!=VAR_P){
+				fprintf(stderr,"Error: Instruction at line %d need memory cell to store result!\n",yylloc.first_line);
+				FatalError=1;
+			}
 		}
 
 	}
 }
 
 %}
-
+%initial-action { 
+	map_init(&labelmap);
+	map_init(&variablemap);
+}
 %union {
 	Identifier identifier;
 	char chr;
@@ -124,27 +153,39 @@ init:  program  {
 			for(int i=0;i<labelcount;i++)Labels[i]=-1;
 			for(int i=0;i<program.len;i++){
 				if(program.instructions[i].label==NULL)continue;
-				if(map_exists(&labelmap,program.instructions[i].label)<=0){
+				if(map_exists(&labelmap,program.instructions[i].label)<0){
+					fprintf(stderr,"Warning: Unused label: %s\n",program.instructions[i].label);
 					free(program.instructions[i].label);
 					continue;
 				}
 				int poi=map_get(&labelmap,program.instructions[i].label);
 				if(Labels[poi]!=-1){
-					exit(1);//taleb uz existuje
+					fprintf(stderr,"Error: Instruction at line %d contains definition of label \"%s\" that is defined on line %d.\n",program.instructions[i].line,program.instructions[i].label,program.instructions[Labels[poi]].line);
+					FatalError=1;
 				}
 				Labels[poi]=i;
 				free(program.instructions[i].label);
 			}
+/*			for(unsigned int i=0;i<labelcount;i++){
+				printf("bbbb %d",Labels[i]);
+			}*/
 			for(int i=0;i<program.len;i++){
 				if(program.instructions[i].type==IN_JUMP||program.instructions[i].type==IN_CALL){
-					if(Labels[program.instructions[i].param[0].value]==-1)exit(1);//neexistuje taky label
+					if(Labels[program.instructions[i].param[0].value]==-1){
+						fprintf(stderr,"Error: Instruction at line %d contain refence to undefined label\n",program.instructions[i].line);
+						FatalError=1;
+					}
 					program.instructions[i].param[0].value = Labels[program.instructions[i].param[0].value];
 				}else if(program.instructions[i].type==IN_IF){
-					if(Labels[program.instructions[i].param[1].value]==-1)exit(1);//neexistuje taky label
+					if(Labels[program.instructions[i].param[1].value]==-1){
+						fprintf(stderr,"Error: Instruction at line %d contain refence to undefined label\n",program.instructions[i].line);
+						FatalError=1;
+					}
 					program.instructions[i].param[1].value = Labels[program.instructions[i].param[1].value];
 				}
 			}
 		}
+;
 
 program: 	  /* empty */     { 
 					$$.len=$$.capacity=0;
@@ -165,8 +206,9 @@ program: 	  /* empty */     {
 				  }
 ;
 
-line: 		  NEWLINE { $$.type=-1; $$.param=NULL; $$.param_len=0;} 
+line: 		  NEWLINE { $$.type=-1; $$.param=NULL; $$.param_len=0; $$.line=yylloc.first_line;}
 		| label FUNCTION NEWLINE {
+				$$.line=@1.first_line;
 			        $$.label=$1.text;	
 				$$.type=map_get(&keywords,$2.text);
 				$$.param_len=0;
@@ -175,11 +217,12 @@ line: 		  NEWLINE { $$.type=-1; $$.param=NULL; $$.param_len=0;}
 				checkInstruction($$);
 			}
 		| label UNARYFUNCTION parameter NEWLINE {
+				$$.line=@1.first_line;
 				$$.label=$1.text;
 				$$.type=map_get(&keywords,$2.text);
 				$$.param_len=1;
 				$$.param=malloc(sizeof(Parameter));
-				if(!strcmp($3.text,"jump"))
+				if(!strcmp($2.text,"jump")||!strcmp($2.text,"call"))
 					$$.param[0]=create_parameter_from_jump_identifier($3);
 				else
 					$$.param[0]=create_parameter_from_identifier($3);
@@ -189,12 +232,13 @@ line: 		  NEWLINE { $$.type=-1; $$.param=NULL; $$.param_len=0;}
 
 		}
 		| label BINARYFUNCTION parameter parameter NEWLINE {
+				$$.line=@1.first_line;
 				$$.label=$1.text;
 				$$.type=map_get(&keywords,$2.text);
 				$$.param_len=2;
 				$$.param=malloc(sizeof(Parameter)*$$.param_len);
 				$$.param[0]=create_parameter_from_identifier($3);
-				if(!strcmp($4.text,"if"))
+				if(!strcmp($2.text,"if"))
 					$$.param[1]=create_parameter_from_jump_identifier($4);
 				else
 					$$.param[1]=create_parameter_from_identifier($4);
@@ -204,6 +248,7 @@ line: 		  NEWLINE { $$.type=-1; $$.param=NULL; $$.param_len=0;}
 				checkInstruction($$);
 		}
 		| label memorycell ASSIGN parameter OPERATOR parameter NEWLINE {
+				$$.line=@1.first_line;
 				$$.label=$1.text;
 				$$.type=IN_OPERATOR;
 				$$.param_len=4;

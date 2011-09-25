@@ -5,6 +5,10 @@
 #include "parser.h"
 #include "error.h"
 
+#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;
+
+extern int FatalError;
+
 void copy_string(char **dest,char *src,int del_begin,int del_end){
 	int len = strlen(src);
 	if(len<del_begin+del_end)ERROR(ERROR_INTERNAL,"I want to delete too much from token\n");
@@ -15,6 +19,7 @@ void copy_string(char **dest,char *src,int del_begin,int del_end){
 
 
 %}
+%option yylineno
 
 LABEL 			(?i:[a-z][a-zA-Z0-9]*)+":"
 FUNCTION   		(?-i:pop|return)
@@ -32,6 +37,7 @@ NEWLINE 		"\n"
 {LABEL}			{
 				copy_string(&yylval.identifier.text,yytext,0,1);
 				yylval.identifier.type=SEM_L;
+		//		printf("label: %s\n",yylval.identifier.text);
 				return LABEL;
 			}
 {FUNCTION}		{
@@ -70,7 +76,7 @@ NEWLINE 		"\n"
 				return ASSIGN;
 			}
 {OPERATOR}		{
-				copy_string(&yylval.identifier.text,yytext,1,0);
+				copy_string(&yylval.identifier.text,yytext,0,0);
 				yylval.identifier.type=SEM_O;
 				return OPERATOR;
 			}
@@ -78,5 +84,8 @@ NEWLINE 		"\n"
 {NEWLINE}		{
 				yylval.chr='\n';
 				return NEWLINE;
+			}
+.			{
+				fprintf(stderr,"Warning: Code at line %d contains weird characters. Trying to ignore them.\n",yylloc.first_line);
 			}
 %%

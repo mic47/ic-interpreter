@@ -20,7 +20,7 @@ void map_destroy (Map *map) {
 void map_force_add (Map *map, char *key, int value) {
 	if(map->size==0) ERROR(ERROR_INTERNAL,"Map has zero size!\n");
 	int newsize = map->size;
-	while (newsize < map->count) newsize *= 2;
+	while (newsize <= map->count) newsize *= 2;
 	if (newsize != map->size) {
 		map->nodes = (Node*)realloc (map->nodes,sizeof (Node) * newsize);
 		map->size = newsize;

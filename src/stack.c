@@ -21,7 +21,7 @@ void stack_push (Stack *stack, int value) {
 	int newsize = stack->size;
 	while (stack->top >= newsize) newsize *= 2;
 	if (stack->size != newsize) {
-		stack->stack = realloc (stack->stack, newsize);
+		stack->stack = realloc (stack->stack, sizeof(int)*newsize);
 		stack->size = newsize;
 	}
 	stack->stack[stack->top++] = value;
@@ -35,7 +35,7 @@ void stack_pop (Stack *stack) {
 	}
 	if (newsize < STACK_INIT_SIZE) newsize = STACK_INIT_SIZE;
 	if (newsize != stack->size) {
-		stack->stack = (int*) realloc (stack->stack, newsize);
+		stack->stack = (int*) realloc (stack->stack, sizeof(int)*newsize);
 		stack->size = newsize;
 	}
 }

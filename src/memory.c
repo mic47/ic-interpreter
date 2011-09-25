@@ -28,7 +28,9 @@ int  memory_new (Memory *memory, int size) {
 	if (size <= 0) {
 		ERROR(memory->error_type,"If you want me to allocate %d words of memory, you must be fool.\n",size);
 	}
-
+	if (memory->size<=0){
+		ERROR(ERROR_INTERNAL,"Memory object is not initialized\n");
+	}
 	int where = memory->max_index;
 	int need = where + size;
 	int newsize = memory->size;
