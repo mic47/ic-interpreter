@@ -1,0 +1,13 @@
+Interpreter pre medzijazyk k projektu z kompilatorov.
+Na skompilovanie staci bison, flex a gcc so standardnymi kniznicami.
+Staci napisat "make" a vyrobi to binarku "interpreter".
+
+Spusta sa "./interpreter <program>". Snazil som sa, aby daval aspon trosku rozumne 
+chybove hlasky. V pripade ze vypise "INTERNAL ERROR", tak ide pravdepodobne o bug 
+v interpreteri.
+
+Pripadne chyby hlasit na emailovu adresu "mic@kompilatory.ksp.sk". S chybami
+prosim poslat aj vstupne subory a vstup na ktorom to padlo. Bez toho to
+neoddebugujem.
+
+
