@@ -3,30 +3,36 @@ CFLAGS=-g3 -pg -std=c99 -I gensrc -I src
 
 all: interpreter
 
-gensrc/lexer.c: src/lexer.lex
+gensrc: 
+	mkdir gensrc
+
+o:
+	mkdir o
+
+gensrc/lexer.c: src/lexer.lex gensrc
 	flex -o gensrc/lexer.c src/lexer.lex 
 
-gensrc/parser.c: src/parser.y
+gensrc/parser.c: src/parser.y gensrc
 	bison -d src/parser.y -o gensrc/parser.c
 
 gensrc/parser.h: gensrc/parser.c
 
-o/lexer.o: gensrc/lexer.c gensrc/parser.h
+o/lexer.o: gensrc/lexer.c gensrc/parser.h o
 	$(GCC) $(CFLAGS) -c gensrc/lexer.c -lfl -o o/lexer.o
 
-o/parser.o: gensrc/parser.c gensrc/parser.h
+o/parser.o: gensrc/parser.c gensrc/parser.h o
 	$(GCC) $(CFLAGS) -c gensrc/parser.c -o o/parser.o
 
-o/stack.o: src/stack.c src/stack.h
+o/stack.o: src/stack.c src/stack.h o
 	$(GCC) $(CFLAGS) -c src/stack.c -o o/stack.o
 
-o/map.o: src/map.c src/map.h
+o/map.o: src/map.c src/map.h o
 	$(GCC) $(CFLAGS) -c src/map.c -o o/map.o
 
-o/memory.o: src/memory.c src/memory.h
+o/memory.o: src/memory.c src/memory.h o
 	$(GCC) $(CFLAGS) -c src/memory.c -o o/memory.o
 
-o/error.o: src/error.c src/error.h
+o/error.o: src/error.c src/error.h o
 	$(GCC) $(CFLAGS) -c src/error.c -o o/error.o
 
 interpreter: src/interpreter.c src/interpreter.h o/lexer.o o/parser.o o/stack.o o/map.o o/memory.o o/error.o
