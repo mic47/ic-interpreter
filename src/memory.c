@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "memory.h"
+#include "error.h"
 
 #define MIN_MEMORY_SIZE 10
 
@@ -12,6 +13,7 @@ void memory_init (Memory *memory) {
 	for (int i = 0; i < MIN_MEMORY_SIZE; i++) memory->goodbits[i] = -1;
 	memory->size = MIN_MEMORY_SIZE;
 	memory->max_index = 0;
+	memory->error_type = ERROR_USER;
 }
 
 void memory_destroy (Memory *memory) {
@@ -24,7 +26,7 @@ void memory_destroy (Memory *memory) {
 
 int  memory_new (Memory *memory, int size) {
 	if (size <= 0) {
-		exit (1);
+		ERROR(memory->error_type,"If you want me to allocate %d words of memory, you must be fool.\n",size);
 	}
 
 	int where = memory->max_index;
@@ -47,35 +49,44 @@ int  memory_new (Memory *memory, int size) {
 }
 
 void memory_delete ( Memory *memory, int pointer) {
-	if (pointer <= 0 || pointer >= memory->size) {
-		exit (1);
+	if (pointer < 0 || pointer >= memory->size) {
+		ERROR(memory->error_type,"Memory at %d is not even allocated!\n",pointer);
 	}
-	if (memory->goodbits[pointer] < 0) {
-		exit (1);
-	}
+	if(memory->goodbits[pointer]==-1)
+		ERROR(memory->error_type,"Memory at %d is not allocated!\n",pointer);
+	if(memory->goodbits[pointer]==-2)
+		ERROR(memory->error_type,"Memory at %d is already free!\n",pointer);
+	if(memory->goodbits[pointer]<-2)
+		ERROR(ERROR_INTERNAL,"Memory at %d has strange state!\n",pointer);
 	if (memory->goodbits[pointer] == 0) {
-		exit (1);
+		ERROR(memory->error_type,"Memory at %d is part of larger chunk. I can free only whole chunk!\n",pointer);
 	}
 	int cnt = memory->goodbits[pointer];
 	for (int i = pointer; i < pointer + cnt; i++) memory->goodbits[i] = -2;
 }
 
 void memory_set (Memory *memory, int pointer, int value) {
-	if (pointer <= 0 || pointer >= memory->size) {
-		exit (1);
+	if (pointer < 0 || pointer >= memory->size) {
+		ERROR(memory->error_type,"Memory at %d is not allocated!\n",pointer);
 	}
-	if (memory->goodbits[pointer] < 0) {
-		exit (1);
-	}
+	if(memory->goodbits[pointer]==-1)
+		ERROR(memory->error_type,"Memory at %d is not allocated!\n",pointer);
+	if(memory->goodbits[pointer]==-2)
+		ERROR(memory->error_type,"Memory at %d is already free!\n",pointer);
+	if(memory->goodbits[pointer]<-2)
+		ERROR(ERROR_INTERNAL,"Memory at %d has strange state!\n",pointer);
 	memory->memory[pointer] = value;
 }
 
 int  memory_get (Memory *memory, int pointer) {
-	if (pointer <= 0 || pointer >= memory->size) {
-		exit (1);
+	if (pointer < 0 || pointer >= memory->size) {
+		ERROR(memory->error_type,"Memory at %d is not allocated!\n",pointer);
 	}
-	if (memory->goodbits[pointer] < 0) {
-		exit (1);
-	}
+	if(memory->goodbits[pointer]==-1)
+		ERROR(memory->error_type,"Memory at %d is not allocated!\n",pointer);
+	if(memory->goodbits[pointer]==-2)
+		ERROR(memory->error_type,"Memory at %d is already free!\n",pointer);
+	if(memory->goodbits[pointer]<-2)
+		ERROR(ERROR_INTERNAL,"Memory at %d has strange state!\n",pointer);
 	return memory->memory[pointer];
 }

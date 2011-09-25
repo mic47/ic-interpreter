@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "stack.h"
+#include "error.h"
 
 void stack_init (Stack* stack) {
 	stack->stack = (int*) malloc (sizeof (int) * STACK_INIT_SIZE);
@@ -16,7 +17,7 @@ void stack_destroy (Stack *stack) {
 }
 
 void stack_push (Stack *stack, int value) {
-	if(stack->size==0) exit(1);
+	if(stack->size==0) ERROR(ERROR_INTERNAL,"Stack has zero capacity!\n");
 	int newsize = stack->size;
 	while (stack->top >= newsize) newsize *= 2;
 	if (stack->size != newsize) {
@@ -40,7 +41,12 @@ void stack_pop (Stack *stack) {
 }
 
 int  stack_top (Stack *stack) {
-	if (stack->top<=0)exit(1);
+	if (stack->top<0){
+		ERROR(ERROR_INTERNAL,"Stack has weird size: %d\n",stack->top);
+	}
+	if(stack->top==0){
+		ERROR(ERROR_USER,"Cannot look on the top of the empty stack!");
+	}
 	return stack->stack[stack->top-1];
 }
 

@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "map.h"
+#include "error.h"
 
 void map_init (Map *map) {
 	map->nodes = (Node*)malloc (sizeof (Node) * MAP_MIN_SIZE);
@@ -17,6 +18,7 @@ void map_destroy (Map *map) {
 }
 
 void map_force_add (Map *map, char *key, int value) {
+	if(map->size==0) ERROR(ERROR_INTERNAL,"Map has zero size!\n");
 	int newsize = map->size;
 	while (newsize < map->count) newsize *= 2;
 	if (newsize != map->size) {

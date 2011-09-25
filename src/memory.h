@@ -6,6 +6,7 @@ struct _Memory{
 	int *goodbits;
 	int max_index;
 	int size;
+	int error_type;
 };
 
 typedef struct _Memory Memory;
