@@ -1,5 +1,5 @@
 #ifndef STACK_H
-#define STACH_H
+#define STACK_H
 
 #define STACK_INIT_SIZE 10
 

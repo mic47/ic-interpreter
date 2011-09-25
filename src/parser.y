@@ -23,6 +23,7 @@ void
 %token <str> POINTER
 %token <chr> ASSIGN
 %token <chr> OPERATOR
+%token <chr> UNARYOPERATOR
 %token <str> NEWLINE
 %token <str> LABEL
 %%
@@ -35,6 +36,7 @@ line: 		  NEWLINE
 		| label UNARYFUNCTION parameter NEWLINE
 		| label BINARYFUNCTION parameter parameter NEWLINE
 		| label memorycell ASSIGN parameter OPERATOR parameter NEWLINE
+		| label memorycell ASSIGN UNARYOPERATOR parameter NEWLINE
 ;
 
 memorycell: 	  VARIABLE
@@ -50,7 +52,3 @@ parameter:	  memorycell
 ;
 
 %%
-
-int main(int argc,char **argv){
-
-}

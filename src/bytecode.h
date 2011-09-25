@@ -1,27 +1,29 @@
 #ifndef BYTECODE_H
 #define BYTECODE_H
 
-struct Parameter{
+#include "memory.h"
+
+struct _Parameter{
 	int type;
 	int value;
 };
+typedef struct _Parameter Parameter;
 
-struct Instruction{
+struct _Instruction{
 	int type;
 	Parameter *param;
+	int param_len;
 };
+typedef struct _Instruction Instruction;
 
-struct Memory{
-	int *cells;
-	int min_cell;
-	int max_cell;
-	Stack stack;
-};
 
-struct Program{
+struct _Program{
 	int len;
 	int ip;
 	Instruction *instructions;
+	Memory memory;
 };
+
+typedef struct _Program Program;
 
 #endif
