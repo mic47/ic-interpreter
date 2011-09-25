@@ -13,6 +13,7 @@ struct _Instruction{
 	int type;
 	Parameter *param;
 	int param_len;
+	char *label;
 };
 typedef struct _Instruction Instruction;
 

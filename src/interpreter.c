@@ -9,8 +9,48 @@
 #include "stack.h"
 #include "instructions.h"
 #include "error.h"
+#include "semantics.h"
+
+Memory memory;
+Program program;
+
+int yyparse();
+
+extern FILE* yyin;
+
+Map operators;
+Map keywords;
+
 
 void createProgram(Program *program,FILE *input){
+	map_set(&keywords,"new",IN_NEW);
+	map_set(&keywords,"delete",IN_DELETE);
+	map_set(&keywords,"pop",IN_POP);
+	map_set(&keywords,"return",IN_RETURN);
+	map_set(&keywords,"jump",IN_JUMP);
+	map_set(&keywords,"readint",IN_READINT);
+	map_set(&keywords,"writeint",IN_WRITEINT);
+	map_set(&keywords,"readchar",IN_READCHAR);
+	map_set(&keywords,"writechar",IN_WRITECHAR);
+	map_set(&keywords,"top",IN_TOP);
+	map_set(&keywords,"push",IN_PUSH);
+	map_set(&keywords,"call",IN_CALL);
+	map_set(&keywords,"if",IN_IF);
+	map_set(&operators,"+",OP_PLUS);
+	map_set(&operators,"-",OP_MINUS);
+	map_set(&operators,"*",OP_MULTIPLY);
+	map_set(&operators,"/",OP_DIVIDE);
+	map_set(&operators,"%",OP_MODULO);
+	map_set(&operators,"&",OP_AND);
+	map_set(&operators,"|",OP_OR);
+	map_set(&operators,"^",OP_XOR);
+	map_set(&operators,"<<",OP_SHL);
+	map_set(&operators,">>",OP_SHR);
+
+	//Nastavime Flexu aby cital vstup zo suboru input
+	yyin = input;
+	// Zavolame parser 
+	yyparse();
 
 }
 
@@ -43,13 +83,11 @@ int main (int argc, char **argv) {
 	}
 	FILE *input = fopen (argv[1], "r");
 
-	Program program;
 	
 	createProgram(&program,input);
 
 	program.ip = 0;
 
-	Memory memory;
 
 	Stack stack;
 	stack_init (&stack);
