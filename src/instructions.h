@@ -28,7 +28,11 @@
 #define IN_TOP 		9
 #define IN_PUSH 	10
 #define IN_CALL 	11
-#define IN_IF 		12
-#define IN_OPERATOR 	13
+#define IN_OPERATOR 	12
+#define IN_IFG 		13
+#define IN_IFEQ 	14
+#define IN_IFL 		15
+#define IN_IFGEQ  	16
+#define IN_IFLEQ 	17
 
 #endif

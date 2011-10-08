@@ -176,7 +176,7 @@ init:  program  {
 						FatalError=1;
 					}
 					program.instructions[i].param[0].value = Labels[program.instructions[i].param[0].value];
-				}else if(program.instructions[i].type==IN_IF){
+				}else if(program.instructions[i].type==IN_IFG||program.instructions[i].type==IN_IFL||program.instructions[i].type==IN_IFEQ||program.instructions[i].type==IN_IFGEQ||program.instructions[i].type==IN_IFLEQ){
 					if(Labels[program.instructions[i].param[1].value]==-1){
 						fprintf(stderr,"Error: Instruction at line %d contain refence to undefined label\n",program.instructions[i].line);
 						FatalError=1;
@@ -238,7 +238,7 @@ line: 		  NEWLINE { $$.type=-1; $$.param=NULL; $$.param_len=0; $$.line=yylloc.fi
 				$$.param_len=2;
 				$$.param=malloc(sizeof(Parameter)*$$.param_len);
 				$$.param[0]=create_parameter_from_identifier($3);
-				if(!strcmp($2.text,"if"))
+				if(!strncmp($2.text,"if",2))
 					$$.param[1]=create_parameter_from_jump_identifier($4);
 				else
 					$$.param[1]=create_parameter_from_identifier($4);

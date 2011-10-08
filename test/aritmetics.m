@@ -1,4 +1,4 @@
-readint A
+readint A #pokusny komentar
 readint B
 D=A+B
 writeint D

@@ -37,7 +37,12 @@ void createProgram(FILE *input){
 	map_set(&keywords,"top",IN_TOP);
 	map_set(&keywords,"push",IN_PUSH);
 	map_set(&keywords,"call",IN_CALL);
-	map_set(&keywords,"if",IN_IF);
+	map_set(&keywords,"if",IN_IFG);
+	map_set(&keywords,"ifg",IN_IFG);
+	map_set(&keywords,"ifgeq",IN_IFGEQ);
+	map_set(&keywords,"ifeq",IN_IFEQ);
+	map_set(&keywords,"ifleq",IN_IFLEQ);
+	map_set(&keywords,"ifg",IN_IFL);
 	map_set(&operators,"+",OP_PLUS);
 	map_set(&operators,"-",OP_MINUS);
 	map_set(&operators,"*",OP_MULTIPLY);
@@ -197,11 +202,51 @@ int main (int argc, char **argv) {
 			program.ip = in.param[0].value;
 		}
 		break;
-		case IN_IF:
+		case IN_IFG:
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
 			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
 			if (val > 0) {
+				increment_instruction = 0;
+				program.ip = in.param[1].value;
+			}
+		}
+		break;
+		case IN_IFGEQ:
+		{
+			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
+			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			if (val >= 0) {
+				increment_instruction = 0;
+				program.ip = in.param[1].value;
+			}
+		}
+		break;
+		case IN_IFEQ:
+		{
+			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
+			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			if (val == 0) {
+				increment_instruction = 0;
+				program.ip = in.param[1].value;
+			}
+		}
+		break;
+		case IN_IFL:
+		{
+			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
+			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			if (val < 0) {
+				increment_instruction = 0;
+				program.ip = in.param[1].value;
+			}
+		}
+		break;
+		case IN_IFLEQ:
+		{
+			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
+			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			if (val <= 0) {
 				increment_instruction = 0;
 				program.ip = in.param[1].value;
 			}
