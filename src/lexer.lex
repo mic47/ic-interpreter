@@ -21,21 +21,22 @@ void copy_string(char **dest,char *src,int del_begin,int del_end){
 %}
 %option yylineno
 
-LABEL 			(?i:[a-z][a-zA-Z0-9]*)+":"
+LABEL 			(?i:[a-z][a-zA-Z0-9]*)+":"+([ \t\n]*)
 FUNCTION   		(?-i:pop|return)
 UNARYFUNCTION 		(?-i:delete|jump|readint|writeint|readchar|writechar|top|push|call)
-BINARYFUNCTION 		(?-i:if|new)
+BINARYFUNCTION 		(?-i:if|ifeq|ifgeq|ifleq|ifl|ifg|new)
 VARIABLE   		[a-zA-Z][a-zA-Z0-9]*
 CONSTANT   		[0-9]*
 POINTER    		@{VARIABLE}
 ASSIGN     		=
 OPERATOR   		"+"|"-"|"*"|"/"|"%"|"&"|"|"|"^"|"<<"|">>"
 WHITESPACE 		[ \t]*
+COMMENT 		"#"+(.*$)
 NEWLINE 		"\n"
 
 %%
 {LABEL}			{
-				copy_string(&yylval.identifier.text,yytext,0,1);
+				copy_string(&yylval.identifier.text,yytext,0,strlen(strstr(yytext,":")));
 				yylval.identifier.type=SEM_L;
 		//		printf("label: %s\n",yylval.identifier.text);
 				return LABEL;
