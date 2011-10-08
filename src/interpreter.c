@@ -233,6 +233,7 @@ int main (int argc, char **argv) {
 				if (val == 0) ERROR(ERROR_USER,"Division by zero\n");
 				result %= val;
 			}
+			break;
 			case OP_AND:
 				result &= val;
 				break;
