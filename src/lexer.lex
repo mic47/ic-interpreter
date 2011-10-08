@@ -31,7 +31,7 @@ POINTER    		@{VARIABLE}
 ASSIGN     		=
 OPERATOR   		"+"|"-"|"*"|"/"|"%"|"&"|"|"|"^"|"<<"|">>"
 WHITESPACE 		[ \t]*
-COMMENT 		"#"+(.*$)
+COMMENT 		"#"+([^\n]*)$
 NEWLINE 		"\n"
 
 %%
