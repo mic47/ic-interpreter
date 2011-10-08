@@ -82,6 +82,7 @@ NEWLINE 		"\n"
 				return OPERATOR;
 			}
 {WHITESPACE}		;
+{COMMENT}		;
 {NEWLINE}		{
 				yylval.chr='\n';
 				return NEWLINE;
