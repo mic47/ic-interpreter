@@ -31,7 +31,30 @@ int  memory_new (Memory *memory, int size) {
 	if (memory->size<=0){
 		ERROR(ERROR_INTERNAL,"Memory object is not initialized\n");
 	}
+	int maxlen = 0;
+	int maxwhere = -1;
+	int len = 0;
+	int reused = 0;
+	if (reuseMemory){
+		for(int i=0;i<memory->max_index;i++){
+			if(memory->goodbits[i]>0){
+				if (len>maxlen){
+					maxwhere=i-len;
+					maxlen=len;
+				}
+				i+=memory->goodbits[i]-1;
+				len=0;
+			}else if (memory->goodbits[i]==-2||memory->goodbits[i]==-1){
+				len++;
+			}
+		}
+	}
+	memory->max_index-=len;
 	int where = memory->max_index;
+	if (maxlen>=size&&maxwhere>=0){
+		where = maxwhere;
+		reused = 1;
+	}
 	int need = where + size;
 	int newsize = memory->size;
 	while (newsize <= need) newsize *= 2;
@@ -44,8 +67,13 @@ int  memory_new (Memory *memory, int size) {
 	}
 
 	memory->goodbits[memory->max_index] = size;
+	if (randomMemory) {
+		for (int i=memory->max_index; i < memory->max_index+size;i++){
+			memory->memory[i]=rand();
+		}
+	}
 	for (int i = memory->max_index + 1; i < memory->max_index + size; i++) memory->goodbits[i] = 0;
-	memory->max_index += size;
+	if (!reused) memory->max_index += size;
 
 	return where;
 }

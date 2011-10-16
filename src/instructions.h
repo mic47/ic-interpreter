@@ -34,5 +34,6 @@
 #define IN_IFL 		15
 #define IN_IFGEQ  	16
 #define IN_IFLEQ 	17
+#define IN_IFNEQ 	18
 
 #endif

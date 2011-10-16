@@ -6,10 +6,13 @@ L1:	ifeq a EQ
 L2:	ifl a L
 L3:	ifgeq a GEQ
 L4:	ifleq a LEQ
+L5: 	ifneq a NEQ
 
 	jump start
 
 G:
+	writeint a
+	writechar 32
 	writechar 103
 	writechar 114
 	writechar 101
@@ -20,7 +23,9 @@ G:
 	writechar 10
 	jump L0
 
-GG:
+GG:	
+	writeint a
+	writechar 32
 	writechar 103
 	writechar 114
 	writechar 101
@@ -33,6 +38,8 @@ GG:
 
 
 EQ:
+	writeint a
+	writechar 32
 	writechar 101
 	writechar 113
 	writechar 117
@@ -41,6 +48,8 @@ EQ:
 	writechar 10
 	jump L2
 L:
+	writeint a
+	writechar 32
 	writechar 108
 	writechar 111
 	writechar 119
@@ -50,6 +59,8 @@ L:
 
 	jump L3
 GEQ:
+	writeint a
+	writechar 32
 	writechar 103
 	writechar 114
 	writechar 101
@@ -67,6 +78,8 @@ GEQ:
 	writechar 10
 	jump L4
 LEQ:
+	writeint a
+	writechar 32
 	writechar 108
 	writechar 111
 	writechar 119
@@ -75,6 +88,17 @@ LEQ:
 	writechar 79
 	writechar 114
 	writechar 69
+	writechar 113
+	writechar 117
+	writechar 97
+	writechar 108
+	writechar 10
+	jump L5
+NEQ:
+	writeint a
+	writechar 32
+	writechar 110
+	writechar 101
 	writechar 113
 	writechar 117
 	writechar 97

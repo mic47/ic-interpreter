@@ -40,9 +40,10 @@ void createProgram(FILE *input){
 	map_set(&keywords,"if",IN_IFG);
 	map_set(&keywords,"ifg",IN_IFG);
 	map_set(&keywords,"ifgeq",IN_IFGEQ);
+	map_set(&keywords,"ifneq",IN_IFNEQ);
 	map_set(&keywords,"ifeq",IN_IFEQ);
 	map_set(&keywords,"ifleq",IN_IFLEQ);
-	map_set(&keywords,"ifg",IN_IFL);
+	map_set(&keywords,"ifl",IN_IFL);
 	map_set(&operators,"+",OP_PLUS);
 	map_set(&operators,"-",OP_MINUS);
 	map_set(&operators,"*",OP_MULTIPLY);
@@ -86,14 +87,65 @@ int set_value_to_memory (Memory *memory,Program *program, Parameter *parameter, 
 }
 
 
+extern Map labelmap;
+extern Map variablemap; 
+
+void debugMemory(Instruction *in,int incount, Stack *stack, Stack *instructionsStack){
+	fprintf(stderr,"=================DEBUG===================\nInstruction count: %d\n",incount);
+	//print registers
+	fprintf(stderr,"Registers:\n");
+	for(int i=0;i< program.memory.max_index;i++){
+		fprintf(stderr,"%s: %d\n",map_reverse_get(&variablemap,i),program.memory.memory[i]);
+	}
+	//print memory
+	fprintf(stderr,"Memory:\n");
+	for(int i=0;i<memory.max_index;i++){
+		if(memory.goodbits[i]>=0){
+			fprintf(stderr," %d:%d",i,memory.memory[i]);
+		}else if (memory.goodbits[i]==-1){
+			fprintf(stderr," %d:A",i);
+		}else if (memory.goodbits[i]==-2){
+			fprintf(stderr," %d:D",i);
+		}else {
+			fprintf(stderr," %d:?",i);
+		}
+
+	}fprintf(stderr,"\n");
+	//print stack
+	fprintf(stderr,"Stack (from bottom to top):\n");
+	for(int i=0;i<stack->top;i++){
+		fprintf(stderr," %d",stack->stack[i]);
+	}fprintf(stderr,"\n");
+	//print instruction stack
+	fprintf(stderr,"Internal stack (from bottom to top):\n");
+	for(int i=0;i<instructionsStack->top;i++){
+		fprintf(stderr," %d",program.instructions[instructionsStack->stack[i]].line);
+	}fprintf(stderr,"\n");
+	fprintf(stderr,"Current instruction line: %d\n",in->line);
+}
+
 int main (int argc, char **argv) {
-	if (argc == 1) {
-		printf ("USAGE: ./interpreter <source file>\n");
+	reuseMemory = 0;
+	randomMemory = 0;
+	int debug  = 0;
+	char *file=NULL;
+	for(int i=1;i<argc;i++){
+		if(!strcmp(argv[i],"--random-memory")){
+			randomMemory=1;
+		}else if (!strcmp(argv[i],"--reuse-memory")){
+			reuseMemory=1;
+		}else if (!strcmp(argv[i],"--debug")){
+			debug = 1;
+		} else {
+			file=argv[i];
+		}
+	}
+	if (file==NULL) {
+		printf ("USAGE: ./interpreter [parameters] <source file>\nPossible parameters:\n    --random-memory | initialize memory to random integers\n    --reuse-memory  | reuse unallocated memory\n");
 		return 1;
 	}
-	FILE *input = fopen (argv[1], "r");
+	FILE *input=fopen(file,"r");
 
-	
 	createProgram(input);
 
 	program.ip = 0;
@@ -116,6 +168,11 @@ int main (int argc, char **argv) {
 		int increment_instruction = 1;
 		if(program.ip<0||program.ip>=program.len)ERROR(ERROR_INTERNAL,"Instruction pointer is outside program\n");
 		Instruction in = program.instructions[program.ip];
+		if (debug) {
+			debugMemory(&in,incount,&stack,&instructionsStack);
+			fgetc(stdin);
+			//TODO: READKEY
+		}
 		switch (in.type) {
 		case IN_NEW:
 		{
@@ -206,6 +263,7 @@ int main (int argc, char **argv) {
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
 			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			//printf("ifg-wtf: %d (%d)\n",val,incount);
 			if (val > 0) {
 				increment_instruction = 0;
 				program.ip = in.param[1].value;
@@ -216,6 +274,7 @@ int main (int argc, char **argv) {
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
 			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			//printf("ifgeq-wtf: %d (%d)\n",val,incount);
 			if (val >= 0) {
 				increment_instruction = 0;
 				program.ip = in.param[1].value;
@@ -226,7 +285,20 @@ int main (int argc, char **argv) {
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
 			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			//printf("ifeq-wtf: %d (%d)\n",val,incount);
 			if (val == 0) {
+				increment_instruction = 0;
+				program.ip = in.param[1].value;
+			}
+			//printf("ifeq-wtf: %d (%d)\n",val,incount);
+		}
+		break;
+		case IN_IFNEQ:
+		{
+			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
+			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			//printf("ifneq-wtf: %d (%d)\n",val,incount);
+			if (val != 0) {
 				increment_instruction = 0;
 				program.ip = in.param[1].value;
 			}
@@ -236,6 +308,7 @@ int main (int argc, char **argv) {
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
 			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			//printf("ifl-wtf: %d (%d)\n",val,incount);
 			if (val < 0) {
 				increment_instruction = 0;
 				program.ip = in.param[1].value;
@@ -246,6 +319,7 @@ int main (int argc, char **argv) {
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
 			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			//printf("ifleq-wtf: %d (%d)\n",val,incount);
 			if (val <= 0) {
 				increment_instruction = 0;
 				program.ip = in.param[1].value;

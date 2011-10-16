@@ -24,7 +24,7 @@ void copy_string(char **dest,char *src,int del_begin,int del_end){
 LABEL 			(?i:[a-z][a-zA-Z0-9]*)+":"+([ \t\n]*)
 FUNCTION   		(?-i:pop|return)
 UNARYFUNCTION 		(?-i:delete|jump|readint|writeint|readchar|writechar|top|push|call)
-BINARYFUNCTION 		(?-i:if|ifeq|ifgeq|ifleq|ifl|ifg|new)
+BINARYFUNCTION 		(?-i:if|ifeq|ifgeq|ifleq|ifl|ifg|ifneq|new)
 VARIABLE   		[a-zA-Z][a-zA-Z0-9]*
 CONSTANT   		[0-9]*
 POINTER    		@{VARIABLE}

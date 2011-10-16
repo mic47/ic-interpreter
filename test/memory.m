@@ -1,51 +1,50 @@
 readint n
+N = n + 0
+new pole N
+start:
+  tmp = pole + N
+  tmp = tmp - 1
+  new @tmp N
+  N = N - 1
+  ifneq N start
 
-an=n+1
-bn=n+0
-new pole an
-zaciatokcyklu: if bn pokracujvcykle
-               jump jumpend
-               pokracujvcykle: push bn
-                               call faktorial
-	                       pole2=pole+bn
-	                       top @pole2
-			       pop
-			       bn=bn-1
-			       jump zaciatokcyklu
-jumpend: jump end 
+call VypisPointre
 
-faktorial: top fa
-           pop
-	   if fa fakt2
-	   push 1
-	   return
-fakt2:     fb = fa-1
-	   push fa
-	   push fb
-	   push fb
-	   call faktorial
-	   top fc
-	   pop
-	   top fb
-	   pop
-	   top fa
-	   pop
-	   fa=fc*fa
-	   push fa
-	   return
+tmp = pole + 0
+N = n + 0
+start2:
+  delete @tmp
+  new @tmp N
+  tmp = tmp + 1
+  N = N - 1
+  ifneq N start2
 
-end: bn=n+0
-     zaccyklus2: if bn pokr
-                 jump totalend
-		 pokr: pole2=pole+bn
-		       writeint bn
-		       writechar 32
-		       writeint @pole2
-		       writechar 10
-		       bn=bn-1
-		       jump zaccyklus2
+call VypisPointre
 
-totalend: delete pole
-     
+
+
+jump end
+VypisPointre:
+	push i
+	push tmp
+	i = n + 0
+	cyk:
+	  tmp = pole + i
+	  tmp = tmp - 1
+	  writeint @tmp
+	  writechar 32
+	  i = i - 1
+	  ifneq i cyk
+	writechar 10
+	top tmp
+	pop
+	top i
+	pop
+	return
+
+
+end:
+	writechar 10
+    
 
 	

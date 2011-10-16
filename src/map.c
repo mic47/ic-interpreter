@@ -45,6 +45,13 @@ int  map_get (Map *map, char *key) {
 	return 0;
 }
 
+char* map_reverse_get(Map *map,int value){
+	for (int i=0;i<map->count;i++){
+		if (map->nodes[i].value == value) return map->nodes[i].key;
+	}
+	return NULL;
+}
+
 int  map_exists (Map *map, char *key) {
 	for (int i = 0; i < map->count; i++) {
 		if (!strcmp (key, map->nodes[i].key) ) {

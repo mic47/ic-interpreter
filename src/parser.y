@@ -1,6 +1,7 @@
 %code requires{
 #include "semantics.h"
 }
+%error-verbose
 %locations
 %{
 #include <stdio.h>
@@ -176,7 +177,7 @@ init:  program  {
 						FatalError=1;
 					}
 					program.instructions[i].param[0].value = Labels[program.instructions[i].param[0].value];
-				}else if(program.instructions[i].type==IN_IFG||program.instructions[i].type==IN_IFL||program.instructions[i].type==IN_IFEQ||program.instructions[i].type==IN_IFGEQ||program.instructions[i].type==IN_IFLEQ){
+				}else if(program.instructions[i].type==IN_IFG||program.instructions[i].type==IN_IFL||program.instructions[i].type==IN_IFEQ||program.instructions[i].type==IN_IFGEQ||program.instructions[i].type==IN_IFLEQ||program.instructions[i].type==IN_IFNEQ){
 					if(Labels[program.instructions[i].param[1].value]==-1){
 						fprintf(stderr,"Error: Instruction at line %d contain refence to undefined label\n",program.instructions[i].line);
 						FatalError=1;

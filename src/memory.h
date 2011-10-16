@@ -11,6 +11,10 @@ struct _Memory{
 
 typedef struct _Memory Memory;
 
+int reuseMemory;
+int randomMemory;
+
+
 void memory_init(Memory *memory);
 void memory_destroy(Memory *memory);
 int  memory_new(Memory *memory,int size);
