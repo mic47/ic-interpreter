@@ -45,7 +45,7 @@ int  stack_top (Stack *stack) {
 		ERROR(ERROR_INTERNAL,"Stack has weird size: %d\n",stack->top);
 	}
 	if(stack->top==0){
-		ERROR(ERROR_USER,"Cannot look on the top of the empty stack!");
+		ERROR(ERROR_USER,"Cannot look on the top of the empty stack!\n");
 	}
 	return stack->stack[stack->top-1];
 }
@@ -53,4 +53,18 @@ int  stack_top (Stack *stack) {
 int  stack_empty (Stack* stack) {
 	if (stack->top == 0) return 1;
 	return 0;
+}
+
+void stack_set(Stack* stack,int where,int what){
+	if (where>=stack->top){
+		ERROR(ERROR_USER,"Trying to access element bellow the bottom of the stack\n");
+	}
+	stack->stack[stack->top-where-1]=what;
+}
+
+int stack_get(Stack*stack,int where){
+	if (where>=stack->top){
+		ERROR(ERROR_USER,"Trying to access element bellow the bottom of the stack\n");
+	}
+	return stack->stack[stack->top-where-1];
 }

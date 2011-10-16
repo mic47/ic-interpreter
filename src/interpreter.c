@@ -65,23 +65,27 @@ void createProgram(FILE *input){
 
 }
 
-int get_value_from_memory (Memory *memory, Program *program, Parameter *parameter, int canconst) {
+int get_value_from_memory (Memory *memory, Program *program, Stack *stack, Parameter *parameter, int canconst) {
 	if (parameter->type == VAR_V) {
 		return memory_get (&program->memory, parameter->value);
 	} else if (parameter->type == VAR_P) {
 		return memory_get (memory, memory_get (&program->memory, parameter->value) );
+	} else if (parameter->type == VAR_S) {
+		return stack_get(stack,parameter->value);		
 	} else if (parameter->type == VAR_C && canconst) {
 		return parameter->value;
 	}
 	ERROR(ERROR_INTERNAL,"Unsupported parameter type. Type is: %d\n",parameter->type);
 }
 
-int set_value_to_memory (Memory *memory,Program *program, Parameter *parameter, int value) {
+int set_value_to_memory (Memory *memory,Program *program,Stack *stack, Parameter *parameter, int value) {
 	if (parameter->type == VAR_V) {
 		memory_set (&program->memory, parameter->value, value);
 	} else if (parameter->type == VAR_P) {
 		memory_set (memory, memory_get (&program->memory, parameter->value), value);
-	} else {
+	} else if (parameter->type== VAR_S) {
+		stack_set(stack,parameter->value,value);	
+	}else {
 		ERROR(ERROR_INTERNAL,"Unsupported parameter type. Type is: %d\n",parameter->type);
 	}
 }
@@ -177,15 +181,15 @@ int main (int argc, char **argv) {
 		case IN_NEW:
 		{
 			if (in.param_len != 2) ERROR(ERROR_INTERNAL,"new -- wrong number of parameters: %d\n",in.param_len);
-			int len = get_value_from_memory(&memory,&program,&in.param[1],1);
+			int len = get_value_from_memory(&memory,&program,&stack,&in.param[1],1);
 			int pointer = memory_new (&memory, len);
-			set_value_to_memory(&memory,&program,&in.param[0],pointer);
+			set_value_to_memory(&memory,&program,&stack,&in.param[0],pointer);
 		}
 		break;
 		case IN_DELETE:
 		{
 			if (in.param_len != 1) ERROR(ERROR_INTERNAL,"delete -- wrong number of parameters: %d\n",in.param_len);
-			int pointer = get_value_from_memory(&memory,&program,&in.param[0],0);
+			int pointer = get_value_from_memory(&memory,&program,&stack,&in.param[0],0);
 			memory_delete (&memory, pointer);
 		}
 		break;
@@ -195,13 +199,13 @@ int main (int argc, char **argv) {
 		break;
 		case IN_TOP: {
 			if (in.param_len != 1) ERROR(ERROR_INTERNAL,"top -- wrong number of parameters: %d\n",in.param_len);
-			set_value_to_memory(&memory,&program,&in.param[0],stack_top(&stack));
+			set_value_to_memory(&memory,&program,&stack,&in.param[0],stack_top(&stack));
 		}
 		break;
 		case IN_PUSH:
 		{
 			if (in.param_len != 1)ERROR(ERROR_INTERNAL,"push -- wrong number of parameters: %d\n",in.param_len);
-			int value = get_value_from_memory(&memory,&program,&in.param[0],1);
+			int value = get_value_from_memory(&memory,&program,&stack,&in.param[0],1);
 			stack_push (&stack, value);
 		}
 		break;
@@ -226,13 +230,13 @@ int main (int argc, char **argv) {
 			if (in.param_len != 1) ERROR(ERROR_INTERNAL,"readint -- wrong number of parameters: %d\n",in.param_len);
 			int r;
 			scanf (" %d", &r);
-			set_value_to_memory(&memory,&program,&in.param[0],r);
+			set_value_to_memory(&memory,&program,&stack,&in.param[0],r);
 		}
 		break;
 		case IN_WRITEINT:
 		{
 			if (in.param_len != 1)  ERROR(ERROR_INTERNAL,"writeint -- wrong number of parameters: %d\n",in.param_len);
-			int r = get_value_from_memory(&memory,&program,&in.param[0],1);
+			int r = get_value_from_memory(&memory,&program,&stack,&in.param[0],1);
 			printf ("%d", r);
 		}
 		break;
@@ -241,13 +245,13 @@ int main (int argc, char **argv) {
 			if (in.param_len != 1) ERROR(ERROR_INTERNAL,"readchar -- wrong number of parameters: %d\n",in.param_len);
 			char r;
 			scanf ("%c", &r);
-			set_value_to_memory(&memory,&program,&in.param[0],r);
+			set_value_to_memory(&memory,&program,&stack,&in.param[0],r);
 		}
 		break;
 		case IN_WRITECHAR:
 		{
 			if (in.param_len != 1)ERROR(ERROR_INTERNAL,"writechar -- wrong number of parameters: %d\n",in.param_len);
-			int r = get_value_from_memory(&memory,&program,&in.param[0],1);
+			int r = get_value_from_memory(&memory,&program,&stack,&in.param[0],1);
 			printf ("%c", r);
 		}
 		break;
@@ -262,7 +266,7 @@ int main (int argc, char **argv) {
 		case IN_IFG:
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
-			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			int val=get_value_from_memory(&memory,&program,&stack,&in.param[0],1);
 			//printf("ifg-wtf: %d (%d)\n",val,incount);
 			if (val > 0) {
 				increment_instruction = 0;
@@ -273,7 +277,7 @@ int main (int argc, char **argv) {
 		case IN_IFGEQ:
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
-			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			int val=get_value_from_memory(&memory,&program,&stack,&in.param[0],1);
 			//printf("ifgeq-wtf: %d (%d)\n",val,incount);
 			if (val >= 0) {
 				increment_instruction = 0;
@@ -284,7 +288,7 @@ int main (int argc, char **argv) {
 		case IN_IFEQ:
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
-			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			int val=get_value_from_memory(&memory,&program,&stack,&in.param[0],1);
 			//printf("ifeq-wtf: %d (%d)\n",val,incount);
 			if (val == 0) {
 				increment_instruction = 0;
@@ -296,7 +300,7 @@ int main (int argc, char **argv) {
 		case IN_IFNEQ:
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
-			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			int val=get_value_from_memory(&memory,&program,&stack,&in.param[0],1);
 			//printf("ifneq-wtf: %d (%d)\n",val,incount);
 			if (val != 0) {
 				increment_instruction = 0;
@@ -307,7 +311,7 @@ int main (int argc, char **argv) {
 		case IN_IFL:
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
-			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			int val=get_value_from_memory(&memory,&program,&stack,&in.param[0],1);
 			//printf("ifl-wtf: %d (%d)\n",val,incount);
 			if (val < 0) {
 				increment_instruction = 0;
@@ -318,7 +322,7 @@ int main (int argc, char **argv) {
 		case IN_IFLEQ:
 		{
 			if (in.param_len != 2)ERROR(ERROR_INTERNAL,"if -- wrong number of parameters: %d\n",in.param_len);
-			int val=get_value_from_memory(&memory,&program,&in.param[0],1);
+			int val=get_value_from_memory(&memory,&program,&stack,&in.param[0],1);
 			//printf("ifleq-wtf: %d (%d)\n",val,incount);
 			if (val <= 0) {
 				increment_instruction = 0;
@@ -330,8 +334,8 @@ int main (int argc, char **argv) {
 		{
 			//4 parametre -- co, kam, odkial 1, odkial 2
 			if (in.param_len != 4) ERROR(ERROR_INTERNAL,"operator -- wrong number of parameters: %d\n",in.param_len);
-			int result = get_value_from_memory(&memory,&program,&in.param[2],1);
-			int val = get_value_from_memory(&memory,&program,&in.param[3],1);
+			int result = get_value_from_memory(&memory,&program,&stack,&in.param[2],1);
+			int val = get_value_from_memory(&memory,&program,&stack,&in.param[3],1);
 			switch (in.param[0].value) {
 			case OP_PLUS:
 				result += val;
@@ -373,7 +377,7 @@ int main (int argc, char **argv) {
 				break;
 
 			}
-			set_value_to_memory(&memory,&program,&in.param[1],result);
+			set_value_to_memory(&memory,&program,&stack,&in.param[1],result);
 		}
 		break;
 		default:

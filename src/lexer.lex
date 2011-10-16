@@ -28,6 +28,7 @@ BINARYFUNCTION 		(?-i:if|ifeq|ifgeq|ifleq|ifl|ifg|ifneq|new)
 VARIABLE   		[a-zA-Z][a-zA-Z0-9]*
 CONSTANT   		[0-9]*
 POINTER    		@{VARIABLE}
+STACKREF 		"^"+[0-9][0-9]*
 ASSIGN     		=
 OPERATOR   		"+"|"-"|"*"|"/"|"%"|"&"|"|"|"^"|"<<"|">>"
 WHITESPACE 		[ \t]*
@@ -67,6 +68,14 @@ NEWLINE 		"\n"
 				yylval.identifier.num = atoi(yytext);
 				return CONSTANT;
 			}
+
+{STACKREF} 		{
+				copy_string(&yylval.identifier.text,yytext,1,0);
+				yylval.identifier.type=SEM_S;
+				yylval.identifier.num = atoi(yytext+1);
+				return STACKREF;
+			}
+
 {POINTER}		{
 				copy_string(&yylval.identifier.text,yytext,1,0);
 				yylval.identifier.type=SEM_P;

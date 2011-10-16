@@ -17,4 +17,7 @@ void stack_pop(Stack*);
 int  stack_top(Stack*);
 int  stack_empty(Stack*);
 
+void stack_set(Stack*,int,int);
+int stack_get(Stack*,int);
+
 #endif

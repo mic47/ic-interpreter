@@ -10,6 +10,7 @@
 #define SEM_F 3
 #define SEM_L 4
 #define SEM_O 5
+#define SEM_S 6
 
 struct _Identifier{
 	int type;

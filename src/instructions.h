@@ -4,6 +4,7 @@
 #define VAR_V 0
 #define VAR_P 1
 #define VAR_C 2
+#define VAR_S 3
 
 #define OP_PLUS 0
 #define OP_MINUS 1
