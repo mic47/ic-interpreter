@@ -174,7 +174,7 @@ int main (int argc, char **argv) {
 		Instruction in = program.instructions[program.ip];
 		if (debug) {
 			debugMemory(&in,incount,&stack,&instructionsStack);
-			fgetc(stdin);
+		//	fgetc(stdin);
 			//TODO: READKEY
 		}
 		switch (in.type) {
