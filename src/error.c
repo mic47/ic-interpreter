@@ -10,7 +10,7 @@ void ERROR(int type,const char*text,...){
 		fprintf(stderr,"INTERNAL ");
 	}
 	fprintf(stderr,"ERROR:");
-	fprintf(stderr,text,args);
+	vfprintf(stderr,text,args);
 	int a=5;
 	int b=5;
 	exit(1/(a-b));
@@ -23,5 +23,5 @@ void WARNING(int type,const char *text,...){
 		fprintf(stderr,"INTERNAL ");
 	}
 	fprintf(stderr,"WARNING");
-	fprintf(stderr,text,args);
+	vfprintf(stderr,text,args);
 }

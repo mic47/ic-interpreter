@@ -72,6 +72,8 @@ int get_value_from_memory (Memory *memory, Program *program, Stack *stack, Param
 		return memory_get (memory, memory_get (&program->memory, parameter->value) );
 	} else if (parameter->type == VAR_S) {
 		return stack_get(stack,parameter->value);		
+	} else if (parameter->type == VAR_SP) {
+		return memory_get (memory, stack_get(stack,parameter->value));
 	} else if (parameter->type == VAR_C && canconst) {
 		return parameter->value;
 	}
@@ -83,9 +85,11 @@ int set_value_to_memory (Memory *memory,Program *program,Stack *stack, Parameter
 		memory_set (&program->memory, parameter->value, value);
 	} else if (parameter->type == VAR_P) {
 		memory_set (memory, memory_get (&program->memory, parameter->value), value);
-	} else if (parameter->type== VAR_S) {
+	} else if (parameter->type == VAR_S) {
 		stack_set(stack,parameter->value,value);	
-	}else {
+	} else if (parameter->type == VAR_SP) {
+		memory_set (memory, stack_get(stack,parameter->value),value);
+	} else {
 		ERROR(ERROR_INTERNAL,"Unsupported parameter type. Type is: %d\n",parameter->type);
 	}
 }

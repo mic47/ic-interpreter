@@ -1,101 +1,157 @@
-push 1
-push 2
-push 3
-push 4
-push 5
-push 6
-push 7
-push 8
-push 9
-push 10
-push 11
-push 12
-push 13
-push 14
-push 15
-push 16
-push 17
-push 18
-push 19
-push 20
-push 21
-push 22
-push 23
-push 24
-push 25
+new a 1
+@a = 0+1 
+push a
+new a 1
+@a = 0+ 2
+push a
+new a 1
+@a = 0+ 3
+push a
+new a 1
+@a = 0+ 4
+push a
+new a 1
+@a = 0+ 5
+push a
+new a 1
+@a = 0+ 6
+push a
+new a 1
+@a = 0+ 7
+push a
+new a 1
+@a = 0+ 8
+push a
+new a 1
+@a = 0+ 9
+push a
+new a 1
+@a = 0+ 10
+push a
+new a 1
+@a = 0+ 11
+push a
+new a 1
+@a = 0+ 12
+push a
+new a 1
+@a = 0+ 13
+push a
+new a 1
+@a = 0+ 14
+push a
+new a 1
+@a = 0+ 15
+push a
+new a 1
+@a = 0+ 16
+push a
+new a 1
+@a = 0+ 17
+push a
+new a 1
+@a = 0+ 18
+push a
+new a 1
+@a = 0+ 19
+push a
+new a 1
+@a = 0+ 20
+push a
+new a 1
+@a = 0+ 21
+push a
+new a 1
+@a = 0+ 22
+push a
+new a 1
+@a = 0+ 23
+push a
+new a 1
+@a = 0+ 24
+push a
+new a 1
+@a = 0+ 25
+push a
 
 call WriteStack
 
-^0 = ^1 + ^2
+@^0 = @^1 + @^2
 
-writeint ^0
+writeint @^0
 writechar 10
 
-^20 = ^24 + ^17
+@^20 = @^24 + @^17
 
-writeint ^20
+writeint @^20
 writechar 10
 
-new ^4 ^21
+new @^4 @^21
 
-writeint ^4
+writeint @^4
 writechar 10
 
 call WriteStack
 
 jump end
 WriteStack:
-	writeint ^0
+	writeint @^0
 	writechar 32
-	writeint ^1
+	writeint @^1
 	writechar 32
-	writeint ^2
+	writeint @^2
 	writechar 32
-	writeint ^3
+	writeint @^3
 	writechar 32
-	writeint ^4
+	writeint @^4
 	writechar 32
-	writeint ^5
+	writeint @^5
 	writechar 32
-	writeint ^6
+	writeint @^6
 	writechar 32
-	writeint ^7
+	writeint @^7
 	writechar 32
-	writeint ^8
+	writeint @^8
 	writechar 32
-	writeint ^9
+	writeint @^9
 	writechar 32
-	writeint ^10
+	writeint @^10
 	writechar 32
-	writeint ^11
+	writeint @^11
 	writechar 32
-	writeint ^12
+	writeint @^12
 	writechar 32
-	writeint ^13
+	writeint @^13
 	writechar 32
-	writeint ^14
+	writeint @^14
 	writechar 32
-	writeint ^15
+	writeint @^15
 	writechar 32
-	writeint ^16
+	writeint @^16
 	writechar 32
-	writeint ^17
+	writeint @^17
 	writechar 32
-	writeint ^18
+	writeint @^18
 	writechar 32
-	writeint ^19
+	writeint @^19
 	writechar 32
-	writeint ^20
+	writeint @^20
 	writechar 32
-	writeint ^21
+	writeint @^21
 	writechar 32
-	writeint ^22
+	writeint @^22
 	writechar 32
-	writeint ^23
+	writeint @^23
 	writechar 32
-	writeint ^24
+	writeint @^24
 	writechar 10
 	return
 
 end:
-writeint ^25
+push 234
+writeint @^25
+writechar 10
+writeint ^0
+writechar 10
+writeint @^0
+writechar 10

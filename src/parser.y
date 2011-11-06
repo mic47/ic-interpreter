@@ -51,6 +51,7 @@ Parameter create_parameter_from_identifier(Identifier id){
 		case SEM_V: ret.type=VAR_V; ret.value=getVariableID(id.text); break;
 		case SEM_P: ret.type=VAR_P; ret.value=getVariableID(id.text); break;
 		case SEM_S: ret.type=VAR_S; ret.value=id.num; break;
+		case SEM_SP: ret.type=VAR_SP; ret.value=id.num; break;
 		case SEM_C: ret.type=VAR_C; ret.value=id.num; break;
 		default: 
 			fprintf(stderr,"Error: Instruction at line %d has keyword or operator as parameter.\n",yylloc.first_line);
@@ -72,7 +73,7 @@ void checkInstruction(Instruction I){
 	switch(I.type){
 		case IN_NEW:
 		{
-			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P && I.param[0].type != VAR_S){
+			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P && I.param[0].type != VAR_S && I.param[0].type != VAR_SP){
 				fprintf(stderr,"Error: Instruction new at line %d need memory cell to store allocated memory.\n",yylloc.first_line-1);
 				FatalError=1;
 			}
@@ -80,14 +81,14 @@ void checkInstruction(Instruction I){
 		break;
 		case IN_DELETE:
 		{
-			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P&& I.param[0].type != VAR_S){
+			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P&& I.param[0].type != VAR_S && I.param[0].type != VAR_SP){
 				fprintf(stderr,"Error: Instruction delete at line %d need memory cell to work!\n",yylloc.first_line-1);
 				FatalError=1;
 			}
 		}
 		break;
 		case IN_TOP: {
-			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P&& I.param[0].type != VAR_S){
+			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P&& I.param[0].type != VAR_S && I.param[0].type != VAR_SP){
 				fprintf(stderr,"Error: Instruction top at line %d need memory cell to work!\n",yylloc.first_line-1);
 				FatalError=1;
 			}
@@ -95,7 +96,7 @@ void checkInstruction(Instruction I){
 		break;
 		case IN_READINT:
 		{
-			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P&& I.param[0].type != VAR_S){
+			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P&& I.param[0].type != VAR_S && I.param[0].type != VAR_SP){
 				fprintf(stderr,"Error: Instruction readint at line %d need memory cell to work!\n",yylloc.first_line-1);
 				FatalError=1;
 			}
@@ -103,7 +104,7 @@ void checkInstruction(Instruction I){
 		break;
 		case IN_READCHAR:
 		{
-			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P&& I.param[0].type != VAR_S){
+			if (I.param[0].type!=VAR_V && I.param[0].type!=VAR_P&& I.param[0].type != VAR_S && I.param[0].type != VAR_SP){
 				fprintf(stderr,"Error: Instruction readchar at line %d need memory cell to work!\n",yylloc.first_line-1);
 				FatalError=1;
 			}
@@ -111,7 +112,7 @@ void checkInstruction(Instruction I){
 		break;
 		case IN_OPERATOR:
 		{
-			if (I.param[1].type!=VAR_V && I.param[1].type!=VAR_P&& I.param[1].type != VAR_S){
+			if (I.param[1].type!=VAR_V && I.param[1].type!=VAR_P&& I.param[1].type != VAR_S && I.param[1].type != VAR_SP){
 				fprintf(stderr,"Error: Instruction at line %d need memory cell to store result!\n",yylloc.first_line);
 				FatalError=1;
 			}
@@ -138,6 +139,7 @@ void checkInstruction(Instruction I){
 %token <identifier>	VARIABLE
 %token <identifier>	CONSTANT
 %token <identifier>	STACKREF
+%token <identifier>     STACKPOINTER
 %token <identifier>	POINTER
 %token <chr> 		ASSIGN
 %token <identifier> 	OPERATOR
@@ -270,6 +272,7 @@ line: 		  NEWLINE { $$.type=-1; $$.param=NULL; $$.param_len=0; $$.line=yylloc.fi
 memorycell: 	  VARIABLE
 		| POINTER
 		| STACKREF
+		| STACKPOINTER
 ;
 
 label: 		  /* empty */ {$$.text=NULL;}
