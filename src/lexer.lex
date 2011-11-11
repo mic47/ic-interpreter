@@ -33,7 +33,7 @@ STACKREF 		"^"+[0-9][0-9]*
 ASSIGN     		=
 OPERATOR   		"+"|"-"|"*"|"/"|"%"|"&"|"|"|"^"|"<<"|">>"
 WHITESPACE 		[ \t]*
-COMMENT 		"#"+([^\n]*)$
+COMMENT 		"#"+([^\n]*)+"\n"+([ \t\n]*)
 NEWLINE 		"\n"
 
 %%
@@ -106,6 +106,6 @@ NEWLINE 		"\n"
 				return NEWLINE;
 			}
 .			{
-				fprintf(stderr,"Warning: Code at line %d contains weird characters. Trying to ignore them.\n",yylloc.first_line);
+				fprintf(stderr,"Warning: Code at line %d contains weird character: \"%s\". Trying to ignore them.\n",yylloc.first_line,yytext);
 			}
 %%

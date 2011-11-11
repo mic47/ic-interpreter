@@ -95,6 +95,11 @@ call WriteStack
 
 jump end
 WriteStack:
+
+
+#toto je komentar medzi definicou
+
+
 	writeint @^0
 	writechar 32
 	writeint @^1
@@ -155,3 +160,4 @@ writeint ^0
 writechar 10
 writeint @^0
 writechar 10
+
