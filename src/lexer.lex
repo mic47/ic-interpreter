@@ -21,7 +21,6 @@ void copy_string(char **dest,char *src,int del_begin,int del_end){
 %}
 %option yylineno
 
-LABEL 			(?i:[a-z][a-zA-Z0-9]*)+":"+([ \t\n]*)
 FUNCTION   		(?-i:pop|return)
 UNARYFUNCTION 		(?-i:delete|jump|readint|writeint|readchar|writechar|top|push|call)
 BINARYFUNCTION 		(?-i:if|ifeq|ifgeq|ifleq|ifl|ifg|ifneq|new)
@@ -33,14 +32,15 @@ STACKREF 		"^"+[0-9][0-9]*
 ASSIGN     		=
 OPERATOR   		"+"|"-"|"*"|"/"|"%"|"&"|"|"|"^"|"<<"|">>"
 WHITESPACE 		[ \t]*
-COMMENT 		"#"+([^\n]*)+"\n"+([ \t\n]*)
+COMMENT 		"#"+([^\n]*)+"\n"
+LABEL 			(?i:[a-z][a-zA-Z0-9]*)+":"+((([ \t\n]*)|{COMMENT})*)
 NEWLINE 		"\n"
 
 %%
 {LABEL}			{
+				//printf("label: %s\n",yytext);
 				copy_string(&yylval.identifier.text,yytext,0,strlen(strstr(yytext,":")));
 				yylval.identifier.type=SEM_L;
-		//		printf("label: %s\n",yylval.identifier.text);
 				return LABEL;
 			}
 {FUNCTION}		{
@@ -101,7 +101,7 @@ NEWLINE 		"\n"
 				return OPERATOR;
 			}
 {WHITESPACE}		;
-{COMMENT}		;
+{COMMENT}		{unput('\n');}
 {NEWLINE}		{
 				yylval.chr='\n';
 				return NEWLINE;
